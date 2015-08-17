@@ -1,0 +1,110 @@
+---
+title: "Week2 Quiz"
+author: "Ajit"
+date: "August 17, 2015"
+output: html_document
+---
+##Question 1: 
+Register an application with the Github API here https://github.com/settings/applications. 
+Access the API to get information on your instructors repositories (
+hint: this is the url you want "https://api.github.com/users/jtleek/repos"). 
+Use this data to find the time that the datasharing repo was created. 
+What time was it created? 
+
+##Solution:
+###Create a Github Application
+    1 Go to https://github.com/settings/applications
+    2 In Applications pane, click on "Developer applications".
+    3 Click on Register new application.
+    4 Application name and Home page URL can be anything. I created an app with name "TestGitApp". 
+    5 URL name needs to be "http://localhost:1410". This is the URL that httpuv uses/provides.
+    6 Register the application.
+    7 Note the client id and client secret that are displayed at the top right corner of the page. This client id and client secret shouldn't be shared with anyone.
+###Implementation of the code
+    1 Do not use RStudio. Use R CLI.
+    2 Implement the following code in R 
+        *Assign the Client id and Client secret
+        client_id<-"<client id>"
+        client_secret<-"<client secret>"
+        *Load the libraries httpuv and httr
+        library(httr)
+        library(httpuv)
+        *Specify the oauth endpoint as "github"
+        myapi<-oauth_app("github",client_id,client_secret)
+        *Get the GIT hub token
+        github_token<-oauth2.0_token(oauth_endpoints("github"),myapi)
+        *github_token should look like this
+            <Token>
+            <oauth_endpoint>
+             authorize: https://github.com/login/oauth/authorize
+             access:    https://github.com/login/oauth/access_token
+            <oauth_app> github
+              key:    <Your Client ID>
+              secret: <hidden>
+            <credentials> access_token, scope, token_type
+        *In case of an error with credential, you will get the last line as 
+            <credentials> error, error_description, error_uri
+        * Get the contents of repository
+            req <- GET("https://api.github.com/users/jtleek/repos")
+            contentData <- content(req)
+
+##Question 2: 
+The sqldf package allows for execution of SQL commands on R data frames. We will use the sqldf package to practice the queries we might send with the dbSendQuery command in RMySQL. Download the American Community Survey data and load it into an R object called acs     [https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06pid.csv](https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06pid.csv) 
+Which of the following commands will select only the data for the probability weights pwgtp1 with ages less than 50?
+
+##Solution:
+### 
+    1 *Load the library sqldf
+        library(sqldf)
+    2 *Load the file getdata-data-ss06pid.csv into variable acs after placing the file in your working directory.
+        acs<-read.csv("getdata-data-ss06pid.csv")
+    3 *Get the data from dataframe acs for proabibilty weights pwgtp1 where ages is less than 50
+      *Execute this step in basic R and not on R studio.
+        sqldf("select pwgtp1 from acs where AGEP < 50")
+
+##Question 3: 
+Using the same data frame you created in the previous problem, what is the equivalent function to unique(acs$AGEP)?
+
+##Solution:
+### 
+    sqldf("select distinct AGEP from acs")
+
+##Question 4: 
+How many characters are in the 10th, 20th, 30th and 100th lines of HTML from this page:
+[http://biostat.jhsph.edu/~jleek/contact.html](http://biostat.jhsph.edu/~jleek/contact.html)
+(Hint: the nchar() function in R may be helpful)
+
+##Solution:
+
+### 
+    * Get the html connection.
+    1 conn<-url("http://biostat.jhsph.edu/~jleek/contact.html")
+    * Use the connection to read the content
+    2 contentData<-readLines(conn)
+    * Close the connection
+    3 close(conn)
+    * Get the number of characters of the lines using nchar.
+    4 sapply(htmlCode[c(10, 20, 30, 100)], nchar)
+
+##Question 5: 
+Read this data set into R and report the sum of the numbers in the fourth column.
+    [https://d396qusza40orc.cloudfront.net/getdata%2Fwksst8110.for](https://d396qusza40orc.cloudfront.net/getdata%2Fwksst8110.for)
+    Original source of the data: http://www.cpc.ncep.noaa.gov/data/indices/wksst8110.for
+    (Hint this is a fixed width file format)
+
+##Solution:
+### 
+    *Download the file into your working directory. 
+    1. 
+    file_name <- "getdata_wksst8110.for"
+    data <- read.csv("file_name", header=T)
+    2. 
+    head(data)
+    *This is fixed width file. Inspection of the file shows we need to skip the first 4 lines
+    dim(data)
+    df <- read.fwf(file=file_name,widths=c(-1,9,-5,4,4,-5,4,4,-5,4,4,-5,4,4), skip=4)
+    head(df)
+    dim(df)
+    *Get the sum of the fourth column
+    sum(df[, 4])
+    
